@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: jekyll
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: jekyll:latest
+  source:
+    dockerfile: |-
+      FROM registry.redhat.io/rhscl/httpd-24-rhel7
+      COPY www /var/www
+    images:
+    - from:
+        kind: ImageStreamTag
+        name: jekyll:latest
+      paths:
+      - sourcePath: /opt/app-root
+        destinationDir: "www"
+  triggers:
+  - imageChange: {}
+    type: ImageChange
