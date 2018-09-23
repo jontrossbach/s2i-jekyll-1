@@ -1,0 +1,55 @@
+#!/bin/bash -e
+#
+# S2I assemble script for the 's2i-jekyll' image.
+#
+# The 'assemble' script builds your application source so that it is ready to run.
+#
+# For more information refer to the documentation:
+#	https://github.com/openshift/source-to-image/blob/master/docs/builder_image.md
+#
+
+if [[ "$1" == "-h" ]]; then
+	# If the 's2i-jekyll-nginx' assemble script is executed with '-h' flag,
+	# print the usage.
+	exec ${STI_SCRIPTS_PATH}/usage
+fi
+
+if [[ -n "$DEBUG" ]]; then
+  env
+
+  find ${APP_ROOT}
+
+  find /tmp
+fi
+
+source scl_source enable ${RUBY_NAME}${RUBY_VERSION}
+
+echo "---> Building application from source..."
+pushd /tmp/src
+
+echo "---> Installing bundle"
+bundle install
+
+echo "---> Updating bundle"
+bundle update
+
+echo "---> Running jekyll build ... "
+bundle exec jekyll build
+popd
+
+echo "---> Installing jekyll generated site"
+cp -Rf /tmp/src/_site/. ./
+
+echo "---> Cleaning up application source"
+rm -rf ./.gem ./bin ./Dockerfile ./Gemfile ./Gemfile.lock ./Makefile
+
+# Fix source directory permissions
+fix-permissions ./
+
+if [[ -n "$DEBUG" ]]; then
+  env
+
+  find ${APP_ROOT}
+
+  find /tmp
+fi
