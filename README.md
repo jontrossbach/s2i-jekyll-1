@@ -52,11 +52,8 @@ of OpenShift):
 * perform a source to image build on your Jekyll site source
 
   ```
-  # s2i build git://<source code> jekyll-nginx <application image>
-  ```
-
-3. run the resulting application image
-
-  ```
-  # docker run -p 8080:8080 <application image>
+  # s2i build --context-dir=example \
+      git://<source code> \
+      s2i-jekyll \
+      <application image>
   ```
