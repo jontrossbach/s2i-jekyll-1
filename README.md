@@ -6,7 +6,8 @@ This repository contains the source for a builder using
 OpenShift's [source-to-image](https://github.com/openshift/source-to-image)
 process.
 
-The resulting image can be hosted in OpenShift or OKD.
+The resulting image is not able to be run, as it only contains the generated
+Jekyll website content.
 
 For more information about using these images with OpenShift, please see the
 official [OpenShift Documentation](https://docs.okd.io/latest/architecture/core_concepts/builds_and_image_streams.html#source-build).
@@ -16,8 +17,10 @@ interest in supporting it.
 
 Versions
 ----------------
-Ruby versions currently provided are:
-* ruby-2.5
+Ruby versions currently supported are included with Red Hat Software
+Collections, and subsequently require the host system doing the build to be
+properly installed, configured and subscribed:
+* rh-ruby2.5
 
 Installation
 ----------------
