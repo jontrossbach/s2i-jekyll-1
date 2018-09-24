@@ -49,11 +49,12 @@ of OpenShift):
 
 * install S2I from https://github.com/openshift/source-to-image
 
-* perform a source to image build on your Jekyll site source
+* perform a source to image build on the example Jekyll site source
 
   ```
-  # s2i build --context-dir=example \
-      git://<source code> \
+  # s2i build \
+      git://github.com/mrjoshuap/s2i-jekyll.git \
+      --context-dir=example \
       s2i-jekyll \
       <application image>
   ```
