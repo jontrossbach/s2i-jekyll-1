@@ -1,23 +1,47 @@
 apiVersion: v1
-kind: BuildConfig
-metadata:
-  name: jekyll
-spec:
-  output:
-    to:
-      kind: ImageStreamTag
-      name: jekyll:latest
-  source:
-    dockerfile: |-
-      FROM registry.redhat.io/rhscl/httpd-24-rhel7
-      COPY www /var/www
-    images:
-    - from:
+items:
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: s2i-jekyll
+    name: s2i-jekyll
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: {}
+    output:
+      to:
         kind: ImageStreamTag
-        name: jekyll:latest
-      paths:
-      - sourcePath: /opt/app-root
-        destinationDir: "www"
-  triggers:
-  - imageChange: {}
-    type: ImageChange
+        name: s2i-jekyll:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/mrjoshuap/s2i-jekyll.git
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: s2i-base-rhel7:latest
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: _1xHLmG5OfN4GpIWYPD0
+      type: GitHub
+    - generic:
+        secret: ljqG5ohNt3nqZpyCn8eK
+      type: Generic
+    - type: ConfigChange
+    - imageChange:
+        lastTriggeredImageID: registry.access.redhat.com/rhscl/s2i-base-rhel7@sha256:87ba1a29b5fc99b5c39c5085caf69a16158ff65fcedbde99b349d7ecdf909088
+      type: ImageChange
+  status:
+    lastVersion: 1
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+

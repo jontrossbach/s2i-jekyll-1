@@ -5,15 +5,18 @@ items:
   metadata:
     labels:
       app: s2i-jekyll
-    name: s2i-jekyll
+    name: s2i-base-rhel7
   spec:
     lookupPolicy:
       local: false
     tags:
-      from:
+    - from:
         kind: DockerImage
-        name: docker.io/mrjoshuap/s2i-jekyll
-      importPolicy: {}
+        name: registry.access.redhat.com/rhscl/s2i-base-rhel7:latest
       name: latest
       referencePolicy:
         type: Source
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
