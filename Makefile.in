@@ -1,7 +1,7 @@
 
 build:
-	#docker build -t $(IMAGE_NAME) .
-	oc start-build -F $(IMAGE_NAME)
+	docker build -t $(IMAGE_NAME) .
+	#oc start-build -F $(IMAGE_NAME)
 
 .PHONY: test
 test:

@@ -9,7 +9,7 @@
 #
 
 if [[ "$1" == "-h" ]]; then
-	# If the 's2i-jekyll-nginx' assemble script is executed with '-h' flag,
+	# If the 's2i-jekyll' assemble script is executed with '-h' flag,
 	# print the usage.
 	exec ${STI_SCRIPTS_PATH}/usage
 fi

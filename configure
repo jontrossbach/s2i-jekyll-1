@@ -10,7 +10,7 @@ for arg in "$@"; do
         ;;
 
     --example-name=*)
-        image_name=`echo $arg | sed 's/--example-name=//'`
+        example_name=`echo $arg | sed 's/--example-name=//'`
         ;;
 
     --help)
