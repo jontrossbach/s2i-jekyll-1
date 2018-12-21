@@ -27,10 +27,8 @@ COPY ./.s2i/bin/ $STI_SCRIPTS_PATH
 COPY ./.s2i/etc/ ${APP_ROOT}/etc
 COPY ./bin/ ${APP_ROOT}/bin
 
-# Drop the root user and make the content of /opt/app-root owned by user 1001
-RUN chown -R 1001:0 ${APP_ROOT} && \
-    chmod -R ug+rwx ${APP_ROOT} && \
-    rpm-file-permissions
+# Reset permissions of filesystem to default values
+RUN /usr/libexec/httpd-prepare && rpm-file-permissions
 
 USER 1001
 
