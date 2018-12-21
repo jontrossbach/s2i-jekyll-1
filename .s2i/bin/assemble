@@ -48,7 +48,7 @@ if [ -n "$RUBYGEM_MIRROR" ]; then
   bundle config mirror.https://rubygems.org $RUBYGEM_MIRROR
 fi
 
-bundle install --path ./bundle ${ADDTL_BUNDLE_ARGS}
+bundle install --path vendor/bundle ${ADDTL_BUNDLE_ARGS}
 
 echo "---> Updating bundle"
 bundle update
