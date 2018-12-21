@@ -22,12 +22,15 @@ LABEL summary="$SUMMARY" \
       usage="docker run mrjoshuap/s2i-jekyll" \
       version="1"
 
-RUN /usr/bin/bash -c "source scl_source enable rh-ruby25; gem install -N jekyll; gem install -N minima"
-
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./.s2i/bin/ $STI_SCRIPTS_PATH
 COPY ./.s2i/etc/ ${APP_ROOT}/etc
 COPY ./bin/ ${APP_ROOT}/bin
+
+# Drop the root user and make the content of /opt/app-root owned by user 1001
+RUN chown -R 1001:0 ${APP_ROOT} && \
+    chmod -R ug+rwx ${APP_ROOT} && \
+    rpm-file-permissions
 
 USER 1001
 
