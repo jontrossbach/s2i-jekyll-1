@@ -22,7 +22,7 @@ if [[ -n "$DEBUG" ]]; then
   find /tmp
 fi
 
-source scl_source enable ${RUBY_NAME}${RUBY_VERSION}
+source scl_source enable rh-ruby25
 
 echo "---> Building application from source..."
 pushd /tmp/src
