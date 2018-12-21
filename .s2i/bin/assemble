@@ -44,10 +44,17 @@ echo "---> Building application from source..."
 pushd /tmp/src
 
 echo "---> Installing bundle"
-bundle install
+if [ -n "$RUBYGEM_MIRROR" ]; then
+  bundle config mirror.https://rubygems.org $RUBYGEM_MIRROR
+fi
+
+bundle install --path ./bundle ${ADDTL_BUNDLE_ARGS}
 
 echo "---> Updating bundle"
 bundle update
+
+echo "---> Cleaning up unused ruby gems ..."
+bundle clean -V
 
 echo "---> Running jekyll build ... "
 bundle exec jekyll build
