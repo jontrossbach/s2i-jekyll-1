@@ -22,7 +22,7 @@ LABEL summary="$SUMMARY" \
       usage="docker run mrjoshuap/s2i-jekyll" \
       version="1"
 
-RUN /bin/bash -c "gem install -N jekyll; gem install -N minima"
+RUN /bin/bash -c "scl_source rh-ruby25; gem install -N jekyll; gem install -N minima"
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./.s2i/bin/ $STI_SCRIPTS_PATH
