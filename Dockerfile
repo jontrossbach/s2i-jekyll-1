@@ -28,7 +28,7 @@ COPY ./.s2i/etc/ ${APP_ROOT}/etc
 COPY ./bin/ ${APP_ROOT}/bin
 
 # Reset permissions of filesystem to default values
-RUN /usr/libexec/httpd-prepare && rpm-file-permissions
+RUN rpm-file-permissions
 
 USER 1001
 
