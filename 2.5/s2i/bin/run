@@ -8,9 +8,11 @@
 # https://github.com/openshift/source-to-image/blob/master/docs/builder_image.md
 #
 
+SOURCE_DIR=/tmp/src
+
 function is_jekyll_installed() {
-  [ ! -f Gemfile.lock ] && return 1
-  grep ' jekyll ' Gemfile.lock >/dev/null
+  [ ! -f $SOURCE_DIR/Gemfile.lock ] && return 1
+  grep ' jekyll ' $SOURCE_DIR/Gemfile.lock >/dev/null
 }
 
 if [[ "$1" == "-h" ]]; then
@@ -20,8 +22,6 @@ if [[ "$1" == "-h" ]]; then
 fi
 
 set -e
-
-SOURCE_DIR=/tmp/src
 
 echo "---> enabling software collections rh-ruby25"
 source scl_source enable rh-ruby25
