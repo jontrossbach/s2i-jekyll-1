@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# S2I assemble script for the 's2i-jekyll' image.
+# S2I assemble script for the 'jekyll-ruby-25-centos7' image.
 #
 # The 'assemble' script builds your application source so that it is ready to run.
 #
@@ -14,6 +14,8 @@ if [[ "$1" == "-h" ]]; then
 	exec ${STI_SCRIPTS_PATH}/usage
 fi
 
+SOURCE_DIR=/tmp/src
+
 if [[ -n "$DEBUG" ]]; then
   echo "==================================================="
   echo "==================================================="
@@ -21,52 +23,45 @@ if [[ -n "$DEBUG" ]]; then
   env
   echo "==================================================="
   echo "==================================================="
-
+  echo ""
   echo "==================================================="
   echo "==================================================="
-  echo "Finding all files in ${APP_ROOT}:"
-  find ${APP_ROOT}
+  echo "Finding all files in $SOURCE_DIR:"
+  find $SOURCE_DIR
   echo "==================================================="
   echo "==================================================="
-
-  echo "==================================================="
-  echo "==================================================="
-  echo "Finding all files in /tmp:"
-  find /tmp
-  echo "==================================================="
-  echo "==================================================="
+  echo ""
 fi
 
 echo "---> enabling software collections rh-ruby25"
 source scl_source enable rh-ruby25
 
+if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
+  echo "---> restore build artifacts"
+  mv /tmp/artifacts/* $HOME/.
+fi
+
 echo "---> Building application from source..."
-pushd /tmp/src
+pushd $SOURCE_DIR
 
 echo "---> Installing bundle"
 if [ -n "$RUBYGEM_MIRROR" ]; then
+  echo "---> Using rubygem mirror: $RUBYGEM_MIRROR"
   bundle config mirror.https://rubygems.org $RUBYGEM_MIRROR
 fi
-
-bundle install --path vendor/bundle ${ADDTL_BUNDLE_ARGS}
+bundle install --path ${HOME}/vendor/bundle ${BUNDLE_INSTALL_ARGS}
 
 echo "---> Updating bundle"
-bundle update
+bundle update ${BUNDLE_UPDATE_ARGS}
 
 echo "---> Cleaning up unused ruby gems ..."
-bundle clean -V
+bundle clean -V ${BUNDLE_CLEAN_ARGS}
 
 echo "---> Running jekyll build ... "
-bundle exec jekyll build
+bundle exec "jekyll build --destination ${HOME}/html ${JEKYLL_BUILD_ARGS}"
 popd
 
-echo "---> Installing jekyll generated site"
-cp -Rf /tmp/src/_site/. ./
-
-echo "---> Cleaning up application source"
-rm -rf ./.gem ./bin ./Dockerfile ./Gemfile ./Gemfile.lock ./Makefile
-
-# Fix source directory permissions
+echo "---> Fix source directory permissions"
 fix-permissions ./
 
 if [[ -n "$DEBUG" ]]; then
@@ -90,4 +85,5 @@ if [[ -n "$DEBUG" ]]; then
   find /tmp
   echo "==================================================="
   echo "==================================================="
+  echo ""
 fi

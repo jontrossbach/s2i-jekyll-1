@@ -8,38 +8,108 @@ items:
     name: s2i-jekyll
   spec:
     failedBuildsHistoryLimit: 5
-    nodeSelector: {}
+    nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
-        name: s2i-jekyll:latest
+        name: 's2i-jekyll:latest'
     postCommit: {}
     resources: {}
     runPolicy: Serial
     source:
       git:
-        uri: https://github.com/mrjoshuap/s2i-jekyll.git
+        uri: 'https://github.com/mrjoshuap/s2i-jekyll.git'
       type: Git
+    strategy:
+      dockerStrategy:
+        env:
+          - name: DEBUG
+            value: '1'
+        from:
+          kind: ImageStreamTag
+          name: 'ruby-25-centos7:latest'
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+      - github:
+          secret: AJlvZ0RtaBHCrKWlxbuL
+        type: GitHub
+      - generic:
+          secret: 5PGuoEWVs_iPEO5tkLZk
+        type: Generic
+      - type: ConfigChange
+      - imageChange:
+        type: ImageChange
+
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: s2i-jekyll
+    name: s2i-jekyll
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: 's2i-jekyll:latest'
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: 'https://github.com/mrjoshuap/s2i-jekyll.git'
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+          - name: DEBUG
+            value: '1'
+        from:
+          kind: ImageStreamTag
+          name: 'ruby-25-centos7:latest'
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+      - github:
+          secret: AJlvZ0RtaBHCrKWlxbuL
+        type: GitHub
+      - generic:
+          secret: 5PGuoEWVs_iPEO5tkLZk
+        type: Generic
+      - type: ConfigChange
+      - imageChange:
+        type: ImageChange
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: image-build
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: image-build:latest
+    source:
+      dockerfile: |-
+        FROM rhscl/httpd-24-rhel7:latest
+        COPY /opt/app-root/src/* /opt/rh/httpd24/root/var/www/html
+      images:
+      - from:
+          kind: ImageStreamTag
+          name: artifact-image:latest
+        paths:
+        - sourcePath: /opt/app-root/src/*
+          destinationDir: "."
     strategy:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: s2i-base-rhel7:latest
-      type: Docker
-    successfulBuildsHistoryLimit: 5
+          name: rhscl/httpd-24-rhel7:latest
     triggers:
-    - github:
-        secret: _1xHLmG5OfN4GpIWYPD0
-      type: GitHub
-    - generic:
-        secret: ljqG5ohNt3nqZpyCn8eK
-      type: Generic
-    - type: ConfigChange
-    - imageChange:
-        lastTriggeredImageID: registry.access.redhat.com/rhscl/s2i-base-rhel7@sha256:87ba1a29b5fc99b5c39c5085caf69a16158ff65fcedbde99b349d7ecdf909088
+    - imageChange: {}
       type: ImageChange
-  status:
-    lastVersion: 1
 kind: List
 metadata:
   resourceVersion: ""

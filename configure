@@ -1,23 +1,29 @@
 #!/usr/bin/env bash
 
-image_name="s2i-jekyll"
-example_name="jekyll"
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-jekyll-ruby}
+VERSIONS=${VERSIONS:-2.5}
+OPENSHIFT_NAMESPACES=${OPENSHIFT_NAMESPACES:-2.0}
 
 for arg in "$@"; do
     case "$arg" in
-    --image-name=*)
-        image_name=`echo $arg | sed 's/--image-name=//'`
+    --base-image-name=*)
+        BASE_IMAGE_NAME=`echo $arg | sed 's/--base-image-name=//'`
         ;;
 
-    --example-name=*)
-        example_name=`echo $arg | sed 's/--example-name=//'`
+    --versions=*)
+        VERSIONS=`echo $arg | sed 's/--versions=//'`
+        ;;
+
+    --openshift-namespaces=*)
+        OPENSHIFT_NAMESPACES=`echo $arg | sed 's/--openshift-namespaces=//'`
         ;;
 
     --help)
         echo 'usage: ./configure [options]'
         echo 'options:'
-        echo '  --image-name=<name of image>: installation prefix'
-        echo '  --example-name=<name of container>'
+        echo '  --base-image-name=<base name of image>: installation prefix'
+        echo '  --versions=<versions of ruby>'
+        echo '  --openshift-namespaces=<openshift namespace version>'
         echo ''
         echo 'all invalid options are silently ignored'
         exit 0
@@ -26,8 +32,10 @@ for arg in "$@"; do
 done
 
 echo 'generating makefile ...'
-echo "IMAGE_NAME = ${image_name}">Makefile
-echo "EXAMPLE_NAME = ${example_name}" >>Makefile
+echo "BASE_IMAGE_NAME = ${BASE_IMAGE_NAME}">Makefile
+echo "VERSIONS = ${VERSIONS}" >>Makefile
+echo "OPENSHIFT_NAMESPACES = ${OPENSHIFT_NAMESPACES}" >>Makefile
+
 cat Makefile.in >>Makefile \
     && echo 'configuration complete, now run "make build"' \
     || (echo 'configuration failed!'; echo ''; exit -1)

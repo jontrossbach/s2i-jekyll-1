@@ -1,0 +1,23 @@
+#!/bin/bash -e
+cat <<EOF
+This is the jekyll-ruby-25-centos7 S2I image.
+
+For more information, please refer to:
+
+  https://github.com/mrjoshuap/s2i-jekyll
+
+To generate a jekyll static website container image:
+
+  1. install S2I from https://github.com/openshift/source-to-image
+
+  2. perform a source to image build on your jekyll site source
+
+    # s2i build git://github.com/mrjoshuap/s2i-jekyll.git \
+      --context-dir=2.5/test/jekyll-test-site \
+      jekyll-test-site
+
+  3. run the resulting image OR export the generated content
+
+      # docker run jekyll-test-site
+
+EOF

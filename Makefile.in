@@ -1,13 +1,7 @@
+# Variables are documented in common/build.sh.
 
-build:
-	docker build -t $(IMAGE_NAME) .
-	#oc start-build -F $(IMAGE_NAME)
+# HACK:  Ensure that 'git pull' for old clones doesn't cause confusion.
+# New clones should use '--recursive'.
+.PHONY: $(shell test -f common/common.mk || echo >&2 'Please do "git submodule update --init" first.')
 
-.PHONY: test
-test:
-	docker build -t $(IMAGE_NAME)-candidate .
-	IMAGE_NAME=$(IMAGE_NAME)-candidate test/run
-
-.PHONY: logs
-logs:
-  oc logs -f bc/$(IMAGE_NAME)
+include common/common.mk
