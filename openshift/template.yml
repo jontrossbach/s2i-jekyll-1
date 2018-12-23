@@ -1,0 +1,402 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: s2i-jekyll
+  resourceVersion: ""
+  selfLink: ""
+objects:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    labels:
+      app: jekyll-serve
+    name: jekyll-serve
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    labels:
+      app: s2i-jekyll
+    name: ruby-25-centos7
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: centos/ruby-25-centos7
+      from:
+        kind: DockerImage
+        name: centos/ruby-25-centos7
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    labels:
+      app: s2i-jekyll
+    name: s2i-jekyll
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations: null
+    labels:
+      app: jekyll-serve-prod-latest
+    name: jekyll-serve-prod-latest
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: jekyll-serve:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: "2.5/test/jekyll-test-site"
+      git:
+        ref: master
+        uri: https://github.com/mrjoshuap/s2i-jekyll.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        env:
+        - name: DEBUG
+          value: "1"
+        from:
+          kind: ImageStreamTag
+          name: s2i-jekyll:latest
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - imageChange:
+      type: ImageChange
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations: null
+    labels:
+      app: s2i-jekyll
+    name: s2i-jekyll
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: s2i-jekyll:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: "2.5"
+      git:
+        ref: master
+        uri: https://github.com/mrjoshuap/s2i-jekyll.git
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ruby-25-centos7:latest
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - imageChange:
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations: null
+    labels:
+      app: jekyll-serve-prod
+    name: jekyll-serve-prod
+  spec:
+    replicas: 1
+    selector:
+      app: jekyll-serve-prod
+      deploymentconfig: jekyll-serve-prod
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations: null
+        labels:
+          app: jekyll-serve-prod
+          deploymentconfig: jekyll-serve-prod
+      spec:
+        containers:
+        - imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 4000
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: jekyll-serve-prod
+          ports:
+          - containerPort: 4000
+            protocol: TCP
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 4000
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - jekyll-serve-prod
+        from:
+          kind: ImageStreamTag
+          name: jekyll-serve:prod
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations: null
+    labels:
+      app: jekyll-serve-prod-latest
+    name: jekyll-serve-prod-latest
+  spec:
+    replicas: 1
+    selector:
+      app: jekyll-serve-prod-latest
+      deploymentconfig: jekyll-serve-prod-latest
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations: null
+        labels:
+          app: jekyll-serve-prod-latest
+          deploymentconfig: jekyll-serve-prod-latest
+      spec:
+        containers:
+        - imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 4000
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: jekyll-serve-prod-latest
+          ports:
+          - containerPort: 4000
+            protocol: TCP
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 4000
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - jekyll-serve-prod-latest
+        from:
+          kind: ImageStreamTag
+          name: jekyll-serve:latest
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations: null
+    labels:
+      app: jekyll-serve-next
+    name: jekyll-serve-next
+  spec:
+    clusterIP: null
+    ports:
+    - name: 4000-tcp
+      port: 4000
+      protocol: TCP
+      targetPort: 4000
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: jekyll-serve-next
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations: null
+    labels:
+      app: jekyll-serve-prod
+    name: jekyll-serve-prod
+  spec:
+    clusterIP: null
+    ports:
+    - name: 4000-tcp
+      port: 4000
+      protocol: TCP
+      targetPort: 4000
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: jekyll-serve-prod
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations: null
+    labels:
+      app: jekyll-serve-prod-latest
+    name: jekyll-serve-prod-latest
+  spec:
+    clusterIP: null
+    ports:
+    - name: 4000-tcp
+      port: 4000
+      protocol: TCP
+      targetPort: 4000
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: jekyll-serve-prod-latest
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations: null
+    labels:
+      app: s2i-jekyll
+    name: s2i-jekyll
+  spec:
+    clusterIP: null
+    ports:
+    - name: 4000-tcp
+      port: 4000
+      protocol: TCP
+      targetPort: 4000
+    selector:
+      app: s2i-jekyll
+      deploymentconfig: s2i-jekyll
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: jekyll-serve-prod
+    name: jekyll-serve
+  spec:
+    alternateBackends:
+    - kind: Service
+      name: jekyll-serve-prod-latest
+      weight: 0
+    port:
+      targetPort: 4000-tcp
+    to:
+      kind: Service
+      name: jekyll-serve-prod
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: jekyll-serve-prod
+    name: jekyll-serve-prod
+  spec:
+    port:
+      targetPort: 4000-tcp
+    to:
+      kind: Service
+      name: jekyll-serve-prod
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: jekyll-serve-prod-latest
+    name: jekyll-serve-prod-latest
+  spec:
+    port:
+      targetPort: 4000-tcp
+    to:
+      kind: Service
+      name: jekyll-serve-prod-latest
+      weight: 100
+    wildcardPolicy: None

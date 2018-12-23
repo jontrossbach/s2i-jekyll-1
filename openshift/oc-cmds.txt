@@ -1,0 +1,6 @@
+oc new-project my-jekyll-site --display-name="My Jekyll Site" --description="This is my generated Jekyll website"
+
+oc process -f openshift/template.yml | oc apply -f -
+
+# wait for oc imagestream my-jekyll-site/jekyll-serve:latest
+oc tag my-jekyll-site/jekyll-serve:latest my-jekyll-site/jekyll-serve:prod
