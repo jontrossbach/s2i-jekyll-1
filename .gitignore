@@ -4,3 +4,5 @@ _site/
 .jekyll-metadata
 Gemfile.lock
 Makefile
+# help.1 files complied by container-common-scripts from README.md files
+*/root/help.1
