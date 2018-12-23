@@ -14,7 +14,7 @@ To generate a jekyll static website container image:
 
     # s2i build git://github.com/mrjoshuap/s2i-jekyll.git \
       --context-dir=2.5/test/jekyll-test-site \
-      jekyll-test-site
+      s2i-jekyll jekyll-test-site
 
   3. run the resulting image OR export the generated content
 
