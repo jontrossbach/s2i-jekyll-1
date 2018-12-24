@@ -60,8 +60,15 @@ if is_jekyll_installed; then
 
   cd "$SOURCE_DIR"
 
+  if [ "${JEKYLL_WATCH:-0}" != "0" ]; then
+    echo "Watching for changes"
+    JEKYLL_SERVE_ARGS="${JEKYLL_SERVE_ARGS} --watch"
+  else
+    JEKYLL_SERVE_ARGS="${JEKYLL_SERVE_ARGS} --no-watch"
+  fi
+
   echo "---> starting jekyll serve"
-  exec bundle exec "jekyll serve --skip-initial-build --no-watch --host=0.0.0.0 --destination=${HOME}/html ${JEKYLL_SERVE_ARGS}"
+  exec bundle exec "jekyll serve --skip-initial-build --host=0.0.0.0 --destination=${HOME}/html ${JEKYLL_SERVE_ARGS}"
 else
   echo "Your static website did not appear to generate properly."
 fi

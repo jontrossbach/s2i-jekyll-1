@@ -1,103 +1,128 @@
-Ruby 2.5 container image
-=================
+Ruby 2.5 Jekyll S2I Container Image
+===================================
 
-This container image includes Ruby 2.5 as a [S2I](https://github.com/openshift/source-to-image) base image for your Ruby 2.5 applications.
-Users can choose between RHEL and CentOS based builder images.
-The RHEL image is available in the [Red Hat Container Catalog](https://access.redhat.com/containers/#/registry.access.redhat.com/rhscl/ruby-25-rhel7)
-as registry.access.redhat.com/rhscl/ruby-25-rhel7.
-The CentOS image is then available on [Docker Hub](https://hub.docker.com/r/centos/ruby-25-centos7/)
-as centos/ruby-25-centos7.
-The resulting image can be run using [Docker](http://docker.io).
+This container image extends the Ruby 2.5 [S2I](https://github.com/openshift/source-to-image)
+base image to build and serve Jekyll based web sites.  Users can choose between
+RHEL and CentOS based builder images.  In either scenario, the required base images
+are located below:
+
+*  [Red Hat Container Catalog](https://access.redhat.com/containers/#/registry.access.redhat.com/rhscl/ruby-25-rhel7)
+   as registry.access.redhat.com/rhscl/ruby-25-rhel7.
+
+*  [Docker Hub](https://hub.docker.com/r/centos/ruby-25-centos7/)
+   as centos/ruby-25-centos7.
+
+The resulting image can be run to serve the generated site, though it would be
+preferable to copy the generated site onto a more appropriate web server such
+as nginx or httpd.  If running in OpenShift, this is easily accomplished and
+you'll want to follow the OpenShift build and run directions below.
 
 Description
 -----------
 
-Ruby 2.5 available as container is a base platform for
-building and running various Ruby 2.5 applications and frameworks.
-Ruby is the interpreted scripting language for quick and easy object-oriented programming.
-It has many features to process text files and to do system management tasks (as in Perl).
-It is simple, straight-forward, and extensible.
+Ruby 2.5 available as container is a base platform for building and running
+various Ruby 2.5 applications and frameworks.  Ruby is the interpreted scripting
+language for quick and easy object-oriented programming.  It has many features
+to process text files and to do system management tasks (as in Perl). It is
+simple, straight-forward, and extensible.
 
-This container image includes an npm utility, so users can use it to install JavaScript
-modules for their web applications. There is no guarantee for any specific npm or nodejs
-version, that is included in the image; those versions can be changed anytime and
-the nodejs itself is included just to make the npm work.
+This container image includes an npm utility, so users can use it to install
+JavaScript modules for their web applications. There is no guarantee for any
+specific npm or nodejs version, that is included in the image; those versions
+can be changed anytime and the nodejs itself is included just to make the npm
+work.
 
 Usage
 ---------------------
-To build a simple [ruby-sample-app](https://github.com/sclorg/s2i-ruby-container/tree/master/2.5/test/puma-test-app) application
-using standalone [S2I](https://github.com/openshift/source-to-image) and then run the
-resulting image with [Docker](http://docker.io) execute:
+To build a simple [jekyll-test-site](https://github.com/mrjoshuap/s2i-jekyll/tree/master/2.5/test/jekyll-test-site)
+website using standalone [S2I](https://github.com/openshift/source-to-image) and
+then run the resulting image with [Docker](http://docker.io) execute:
 
 *  **For RHEL based image**
     ```
-    $ s2i build https://github.com/sclorg/s2i-ruby-container.git --context-dir=2.5/test/puma-test-app/ rhscl/ruby-25-rhel7 ruby-sample-app
-    $ docker run -p 8080:8080 ruby-sample-app
+    $ s2i build \
+        https://github.com/mrjoshuap/s2i-jekyll.git \
+            --context-dir=2.5/test/jekyll-test-site/ \
+        mrjoshuap/jekyll-ruby-25-rhel7 \
+        jekyll-test-site
+
+    $ docker run -p 4000:4000 jekyll-test-site
     ```
 
 *  **For CentOS based image**
     ```
-    $ s2i build https://github.com/sclorg/s2i-ruby-container.git --context-dir=2.5/test/puma-test-app/ centos/ruby-25-centos7 ruby-sample-app
-    $ docker run -p 8080:8080 ruby-sample-app
+    $ s2i build \
+        https://github.com/mrjoshuap/s2i-jekyll.git \
+            --context-dir=2.5/test/jekyll-test-site/ \
+        mrjoshuap/jekyll-ruby-25-centos7 \
+        jekyll-test-site
+
+    $ docker run -p 4000:4000 jekyll-test-site
     ```
 
-**Accessing the application:**
+**Accessing the Generated Website:**
 ```
-$ curl 127.0.0.1:8080
+$ curl 127.0.0.1:4000
 ```
 
-Environment variables
+Environment Variables
 ---------------------
 
-To set these environment variables, you can place them as a key value pair into a `.sti/environment`
-file inside your source code repository.
+To set these environment variables, you can place them as a key value pair into
+a `.sti/environment` file inside your source code repository, or preferably as
+build environment variables.
 
-* **RACK_ENV**
+* **BUNDLE_CLEAN_ARGS**
 
-    This variable specifies the environment where the Ruby application will be deployed (unless overwritten) - `production`, `development`, `test`.
-    Each level has different behaviors in terms of logging verbosity, error pages, ruby gem installation, etc.
+* **BUNDLE_INSTALL_ARGS**
 
-    **Note**: Application assets will be compiled only if the `RACK_ENV` is set to `production`
+* **BUNDLE_UPDATE_ARGS**
 
-* **DISABLE_ASSET_COMPILATION**
+* **JEKYLL_BUILD_ARGS**
 
-    This variable set to `true` indicates that the asset compilation process will be skipped. Since this only takes place
-    when the application is run in the `production` environment, it should only be used when assets are already compiled.
+* **JEKYLL_DRAFTS**
 
-* **PUMA_MIN_THREADS**, **PUMA_MAX_THREADS**
+    When set to a non-zero value, Jekyll will render posts in the `_drafts` folder.
+    Defaults to `0`
 
-    These variables indicate the minimum and maximum threads that will be available in [Puma](https://github.com/puma/puma)'s thread pool.
+* **JEKYLL_ENV**
 
-* **PUMA_WORKERS**
+    This variable specifies the environment where the Ruby application will be
+    deployed (unless overwritten) - `production`, `development`, `test`.
+    Each level has different behaviors in terms of logging verbosity,
+    error pages, ruby gem installation, etc.
+    Defaults to `development`
 
-    This variable indicate the number of worker processes that will be launched. See documentation on Puma's [clustered mode](https://github.com/puma/puma#clustered-mode).
+* **JEKYLL_UNPUBLISHED**
+
+    When set to a non-zero value, Jekyll will render posts marked as unpublished.
+    Defaults to `0`
+
+* **JEKYLL_WATCH**
+
+    When set to a non-zero value, Jekyll will watch for changes to rebuild.
+    This does only applies to sites served with
+    the built container image.  See Hot Deployments below.
+    Defaults to `0`
 
 * **RUBYGEM_MIRROR**
 
-    Set this variable to use a custom RubyGems mirror URL to download required gem packages during build process.
+    Set this variable to use a custom RubyGems mirror URL to download required
+    gem packages during build process.
+    Defaults to UNSET
 
-Hot deploy
----------------------
-In order to dynamically pick up changes made in your application source code, you need to make following steps:
+
+* **
+Hot Deployments
+---------------
+In order to dynamically pick up changes made in your application source code,
+you need to perform the following steps:
 
 *  **For Ruby on Rails applications**
 
-    Run the built Rails image with the `RAILS_ENV=development` environment variable passed to the [Docker](http://docker.io) `-e` run flag:
+    Run the built Jekyll image with the `JEKYLL_WATCH=1` environment variable passed to the [Docker](http://docker.io) `-e` run flag:
     ```
-    $ docker run -e RAILS_ENV=development -p 8080:8080 rails-app
-    ```
-*  **For other types of Ruby applications (Sinatra, Padrino, etc.)**
-
-    Your application needs to be built with one of gems that reloads the server every time changes in source code are done inside the running container. Those gems are:
-    * [Shotgun](https://github.com/rtomayko/shotgun)
-    * [Rerun](https://github.com/alexch/rerun)
-    * [Rack-livereload](https://github.com/johnbintz/rack-livereload)
-
-    Please note that in order to be able to run your application in development mode, you need to modify the [S2I run script](https://github.com/openshift/source-to-image#anatomy-of-a-builder-image), so the web server is launched by the chosen gem, which checks for changes in the source code.
-
-    After you built your application image with your version of [S2I run script](https://github.com/openshift/source-to-image#anatomy-of-a-builder-image), run the image with the RACK_ENV=development environment variable passed to the [Docker](http://docker.io) -e run flag:
-    ```
-    $ docker run -e RACK_ENV=development -p 8080:8080 sinatra-app
+    $ docker run -e JEKYLL_WATCH=1 -p 4000:4000 jekyll-test-site
     ```
 
 To change your source code in running container, use Docker's [exec](http://docker.io) command:
@@ -108,39 +133,8 @@ docker exec -it <CONTAINER_ID> /bin/bash
 After you [Docker exec](http://docker.io) into the running container, your current
 directory is set to `/opt/app-root/src`, where the source code is located.
 
-Performance tuning
----------------------
-You can tune the number of threads per worker using the
-`PUMA_MIN_THREADS` and `PUMA_MAX_THREADS` environment variables.
-Additionally, the number of worker processes is determined by the number of CPU
-cores that the container has available, as recommended by
-[Puma](https://github.com/puma/puma)'s documentation. This is determined using
-the cgroup [cpusets](https://www.kernel.org/doc/Documentation/cgroup-v1/cpusets.txt)
-subsystem. You can specify the cores that the container is allowed to use by passing
-the `--cpuset-cpus` parameter to the [Docker](http://docker.io) run command:
-```
-$ docker run -e PUMA_MAX_THREADS=32 --cpuset-cpus='0-2,3,5' -p 8080:8080 sinatra-app
-```
-The number of workers is also limited by the memory limit that is enforced using
-cgroups. The builder image assumes that you will need 50 MiB as a base and
-another 15 MiB for every worker process plus 128 KiB for each thread. Note that
-each worker has its own threads, so the total memory required for the whole
-container is computed using the following formula:
-
-```
-50 + 15 * WORKERS + 0.125 * WORKERS * PUMA_MAX_THREADS
-```
-You can specify a memory limit using the `--memory` flag:
-```
-$ docker run -e PUMA_MAX_THREADS=32 --memory=300m -p 8080:8080 sinatra-app
-```
-If memory is more limiting then the number of available cores, the number of
-workers is scaled down accordingly to fit the above formula. The number of
-workers can also be set explicitly by setting `PUMA_WORKERS`.
-
-
 See also
 --------
 Dockerfile and other sources are available on https://github.com/sclorg/s2i-ruby-container.
 In that repository you also can find another versions of Python environment Dockerfiles.
-Dockerfile for CentOS is called Dockerfile, Dockerfile for RHEL is called Dockerfile.rhel7.
+Dockerfile for CentOS is called `Dockerfile`, Dockerfile for RHEL is called `Dockerfile.rhel7`.

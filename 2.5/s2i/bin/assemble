@@ -42,7 +42,9 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
 fi
 
 echo "---> Building application from source..."
-pushd $SOURCE_DIR
+mv $SOURCE_DIR ${HOME}/.
+
+pushd ${HOME}/src
 
 echo "---> Installing bundle"
 if [ -n "$RUBYGEM_MIRROR" ]; then
@@ -58,7 +60,17 @@ echo "---> Cleaning up unused ruby gems ..."
 bundle clean -V ${BUNDLE_CLEAN_ARGS}
 
 echo "---> Running jekyll build ... "
+if [ "${JEKYLL_DRAFTS:-0}" != "0" ]; then
+  echo "---> Rendering drafts"
+  JEKYLL_BUILD_ARGS="${JEKYLL_BUILD_ARGS} --drafts"
+fi
+if [ "${JEKYLL_UNPUBLISHED:-0}" != "0" ]; then
+  echo "---> Rendering unpublished"
+  JEKYLL_BUILD_ARGS="${JEKYLL_BUILD_ARGS} --unpublished"
+fi
+
 bundle exec "jekyll build --destination ${HOME}/html ${JEKYLL_BUILD_ARGS}"
+
 popd
 
 echo "---> Fix source directory permissions"
