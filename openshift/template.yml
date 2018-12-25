@@ -103,12 +103,7 @@ objects:
           name: ${HTTPD_IMAGE_NAME}:${HTTPD_IMAGE_TAG_NAME}
       type: Docker
     triggers:
-    - imageChange: {}
-      type: ImageChange
-      imageChangeParams:
-        from:
-          kind: ImageStreamTag
-          name: ${HTTPD_IMAGE_NAME}:prod
+    # This doesn't seem to have any effect?
     - imageChange:
       type: ImageChange
       imageChangeParams:
@@ -573,17 +568,17 @@ labels:
 parameters:
 
 - description: The git repository of your Jekyll Site Source code.
-  displayName: git repository
+  displayName: git repository of Jekyll site
   name: JEKYLL_GIT_REPO
   value: https://github.com/mrjoshuap/s2i-jekyll.git
 
 - description: The git branch/tag/reference of your Jekyll Site Source code.
-  displayName: git branch/tag/reference name
+  displayName: git branch/tag/reference name of Jekyll site
   name: JEKYLL_GIT_REF_NAME
   value: master
 
 - description: The context directory of your Jekyll Site Source code.
-  displayName: git context directory
+  displayName: git context directory of Jekyll site
   name: JEKYLL_GIT_CONTEXT_DIR
   value: 2.5/test/jekyll-test-site
 
@@ -597,17 +592,17 @@ parameters:
   value: production
 
 - description: The git repository of s2i-jekyll
-  displayName: git repository
+  displayName: git repository of s2i-jekyll
   name: S2I_JEKYLL_GIT_REPO
   value: https://github.com/mrjoshuap/s2i-jekyll.git
 
 - description: The git branch/tag/reference the s2i-jekyll
-  displayName: git branch/tag/reference name
+  displayName: git branch/tag/reference name of s2i-jekyll
   name: S2I_JEKYLL_GIT_REF_NAME
   value: master
 
 - description: The context directory of s2i-jekyll
-  displayName: git context directory
+  displayName: git context directory of s2i-jekyll
   name: S2I_JEKYLL_GIT_CONTEXT_DIR
   value: "2.5"
 
