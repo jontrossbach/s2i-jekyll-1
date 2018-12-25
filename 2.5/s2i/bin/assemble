@@ -42,9 +42,7 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
 fi
 
 echo "---> Building application from source..."
-mv $SOURCE_DIR ${HOME}/.
-
-pushd ${HOME}/src
+pushd $SOURCE_DIR
 
 echo "---> Installing bundle"
 if [ -n "$RUBYGEM_MIRROR" ]; then

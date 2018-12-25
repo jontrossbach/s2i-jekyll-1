@@ -58,7 +58,7 @@ if is_jekyll_installed; then
      exit 1
   fi
 
-  cd "$HOME/src"
+  cd "$SOURCE_DIR"
 
   if [ "${JEKYLL_WATCH:-0}" != "0" ]; then
     echo "Watching for changes"
