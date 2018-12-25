@@ -53,12 +53,12 @@ fi
 if is_jekyll_installed; then
   export_vars=$(cgroup-limits) ; export $export_vars
 
-  if [ ! -d "$SOURCE_DIR" ]; then
+  if [ ! -d "$HOME/src" ]; then
      echo "Error: Source volume not mounted or available"
      exit 1
   fi
 
-  cd "$SOURCE_DIR"
+  cd "$HOME/src"
 
   if [ "${JEKYLL_WATCH:-0}" != "0" ]; then
     echo "Watching for changes"
