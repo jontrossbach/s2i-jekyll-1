@@ -4,6 +4,6 @@
 # be surpressed.  Otherwise, the tar stream will be corrupted.
 pushd ${APP_ROOT} >/dev/null
 
-tar cf - vendor
+tar cf - vendor html
 
 popd >/dev/null

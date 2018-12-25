@@ -100,11 +100,21 @@ objects:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: ${HTTPD_IMAGE_NAME}:latest
+          name: ${HTTPD_IMAGE_NAME}:${HTTPD_IMAGE_TAG_NAME}
       type: Docker
     triggers:
+    - imageChange: {}
+      type: ImageChange
+      imageChangeParams:
+        from:
+          kind: ImageStreamTag
+          name: ${HTTPD_IMAGE_NAME}:prod
     - imageChange:
       type: ImageChange
+      imageChangeParams:
+        from:
+          kind: ImageStreamTag
+          name: ${JEKYLL_SERVE_SERVICE_NAME}:prod
 
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
