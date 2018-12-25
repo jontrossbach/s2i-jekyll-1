@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# S2I assemble script for the 'jekyll-ruby-25-centos7' image.
+# S2I assemble script for the 'jekyll-ruby-25' image.
 #
 # The 'assemble' script builds your application source so that it is ready to run.
 #
@@ -15,6 +15,9 @@ if [[ "$1" == "-h" ]]; then
 fi
 
 SOURCE_DIR=/tmp/src
+
+echo "---> enabling software collections rh-ruby25"
+source scl_source enable rh-ruby25
 
 if [[ -n "$DEBUG" ]]; then
   echo "==================================================="
@@ -32,9 +35,6 @@ if [[ -n "$DEBUG" ]]; then
   echo "==================================================="
   echo ""
 fi
-
-echo "---> enabling software collections rh-ruby25"
-source scl_source enable rh-ruby25
 
 if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
   echo "---> restore build artifacts"

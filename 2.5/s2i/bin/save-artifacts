@@ -1,16 +1,9 @@
 #!/bin/bash
 
-# Besides the tar command, all other output to standard out must 
+# Besides the tar command, all other output to standard out must
 # be surpressed.  Otherwise, the tar stream will be corrupted.
 pushd ${APP_ROOT} >/dev/null
-if [ -d html && -d vendor ]; then
-    # html and vendor contents to tar stream
-    tar cf - html vendor
-elif [ -d html ]; then
-    # all html contents to tar stream
-    tar cf - html
-elif [ -d vendor ]; then
-    # all vendor contents to tar stream
-    tar cf - vendor
-fi
+
+tar cf - vendor
+
 popd >/dev/null

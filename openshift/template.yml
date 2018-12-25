@@ -1,70 +1,129 @@
 apiVersion: v1
-kind: Template
-metadata:
-  name: s2i-jekyll
-  resourceVersion: ""
-  selfLink: ""
 objects:
 - apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
-    annotations: null
     labels:
-      app: jekyll-serve
-    name: jekyll-serve
-  spec:
-    lookupPolicy:
-      local: false
-- apiVersion: image.openshift.io/v1
-  kind: ImageStream
-  metadata:
-    annotations: null
-    labels:
-      app: s2i-jekyll
-    name: ruby-25-centos7
+      app: ${JEKYLL_HTTPD_SERVICE_NAME}
+    name: ${HTTPD_IMAGE_NAME}
   spec:
     lookupPolicy:
       local: false
     tags:
     - annotations:
-        openshift.io/imported-from: centos/ruby-25-centos7
+        openshift.io/imported-from: ${HTTPD_IMAGE_NAMESPACE}/${HTTPD_IMAGE_NAME}
       from:
         kind: DockerImage
-        name: centos/ruby-25-centos7
-      generation: 2
+        name: ${HTTPD_IMAGE_NAMESPACE}/${HTTPD_IMAGE_NAME}
       importPolicy: {}
-      name: latest
+      name: ${HTTPD_IMAGE_TAG_NAME}
       referencePolicy:
         type: Source
+
 - apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
-    annotations: null
+    labels:
+      app: ${JEKYLL_HTTPD_SERVICE_NAME}
+    name: ${JEKYLL_HTTPD_SERVICE_NAME}
+  spec:
+    lookupPolicy:
+      local: false
+
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${JEKYLL_SERVE_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_SERVICE_NAME}
+  spec:
+    lookupPolicy:
+      local: false
+
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: s2i-jekyll
+    name: ${RUBY_IMAGE_NAME}
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: ${RUBY_IMAGE_NAMESPACE}/${RUBY_IMAGE_NAME}
+      from:
+        kind: DockerImage
+        name: ${RUBY_IMAGE_NAMESPACE}/${RUBY_IMAGE_NAME}
+      importPolicy: {}
+      name: RUBY_IMAGE_TAG_NAME
+      referencePolicy:
+        type: Source
+
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
     labels:
       app: s2i-jekyll
     name: s2i-jekyll
   spec:
     lookupPolicy:
       local: false
+
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
-    annotations: null
+    name: ${JEKYLL_HTTPD_SERVICE_NAME}
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${JEKYLL_HTTPD_SERVICE_NAME}:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      dockerfile: |-
+        FROM ${HTTPD_IMAGE_NAMESPACE}/${HTTPD_IMAGE_NAME}:${HTTPD_IMAGE_TAG_NAME}
+        COPY html /opt/rh/httpd24/root/var/www/html
+      images:
+      - as: null
+        from:
+          kind: ImageStreamTag
+          name: ${JEKYLL_SERVE_SERVICE_NAME}:prod
+        paths:
+        - destinationDir: .
+          sourcePath: /opt/app-root/src/html
+      type: Dockerfile
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ${HTTPD_IMAGE_NAME}:latest
+      type: Docker
+    triggers:
+    - imageChange:
+      type: ImageChange
+
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
     labels:
-      app: jekyll-serve-prod-latest
-    name: jekyll-serve-prod-latest
+      app: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
   spec:
     failedBuildsHistoryLimit: 5
     nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
-        name: jekyll-serve:latest
+        name: ${JEKYLL_SERVE_SERVICE_NAME}:latest
     postCommit: {}
     resources: {}
     runPolicy: Serial
     source:
-      contextDir: "2.5/test/jekyll-test-site"
+      contextDir: 2.5/test/jekyll-test-site
       git:
         ref: master
         uri: https://github.com/mrjoshuap/s2i-jekyll.git
@@ -74,6 +133,8 @@ objects:
         env:
         - name: DEBUG
           value: "1"
+        - name: JEKYLL_ENV
+          value: production
         from:
           kind: ImageStreamTag
           name: s2i-jekyll:latest
@@ -82,10 +143,10 @@ objects:
     triggers:
     - imageChange:
       type: ImageChange
+
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
-    annotations: null
     labels:
       app: s2i-jekyll
     name: s2i-jekyll
@@ -109,24 +170,26 @@ objects:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: ruby-25-centos7:latest
+          name: ${RUBY_IMAGE_NAME}:${RUBY_IMAGE_TAG_NAME}
       type: Docker
     successfulBuildsHistoryLimit: 5
     triggers:
     - imageChange:
       type: ImageChange
+
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
-    annotations: null
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
     labels:
-      app: jekyll-serve-prod
-    name: jekyll-serve-prod
+      app: ${JEKYLL_HTTPD_SERVICE_NAME}
+    name: ${JEKYLL_HTTPD_SERVICE_NAME}
   spec:
     replicas: 1
     selector:
-      app: jekyll-serve-prod
-      deploymentconfig: jekyll-serve-prod
+      app: ${JEKYLL_HTTPD_SERVICE_NAME}
+      deploymentconfig: ${JEKYLL_HTTPD_SERVICE_NAME}
     strategy:
       activeDeadlineSeconds: 21600
       resources: {}
@@ -139,13 +202,74 @@ objects:
       type: Rolling
     template:
       metadata:
-        annotations: null
+        annotations:
+          openshift.io/generated-by: OpenShiftWebConsole
         labels:
-          app: jekyll-serve-prod
-          deploymentconfig: jekyll-serve-prod
+          app: ${JEKYLL_HTTPD_SERVICE_NAME}
+          deploymentconfig: ${JEKYLL_HTTPD_SERVICE_NAME}
       spec:
         containers:
         - imagePullPolicy: Always
+          name: ${JEKYLL_HTTPD_SERVICE_NAME}
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${JEKYLL_HTTPD_SERVICE_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${JEKYLL_HTTPD_SERVICE_NAME}:latest
+      type: ImageChange
+
+
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+      deploymentconfig: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+          deploymentconfig: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+      spec:
+        containers:
+        - env:
+          - name: JEKYLL_ENV
+            value: production
+          imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -155,7 +279,7 @@ objects:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-          name: jekyll-serve-prod
+          name: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
           ports:
           - containerPort: 4000
             protocol: TCP
@@ -184,23 +308,25 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - jekyll-serve-prod
+        - ${JEKYLL_SERVE_PROD_SERVICE_NAME}
         from:
           kind: ImageStreamTag
-          name: jekyll-serve:prod
+          name: ${JEKYLL_SERVE_SERVICE_NAME}:prod
       type: ImageChange
+
+
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
-    annotations: null
     labels:
-      app: jekyll-serve-prod-latest
-    name: jekyll-serve-prod-latest
+      app: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
   spec:
     replicas: 1
+    revisionHistoryLimit: 10
     selector:
-      app: jekyll-serve-prod-latest
-      deploymentconfig: jekyll-serve-prod-latest
+      app: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
+      deploymentconfig: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
     strategy:
       activeDeadlineSeconds: 21600
       resources: {}
@@ -213,10 +339,9 @@ objects:
       type: Rolling
     template:
       metadata:
-        annotations: null
         labels:
-          app: jekyll-serve-prod-latest
-          deploymentconfig: jekyll-serve-prod-latest
+          app: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
+          deploymentconfig: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
       spec:
         containers:
         - imagePullPolicy: Always
@@ -229,7 +354,7 @@ objects:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-          name: jekyll-serve-prod-latest
+          name: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
           ports:
           - containerPort: 4000
             protocol: TCP
@@ -258,18 +383,43 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - jekyll-serve-prod-latest
+        - ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
         from:
           kind: ImageStreamTag
-          name: jekyll-serve:latest
+          name: ${JEKYLL_SERVE_SERVICE_NAME}:latest
       type: ImageChange
+
+
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations: null
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
     labels:
-      app: jekyll-serve-next
-    name: jekyll-serve-next
+      app: ${JEKYLL_HTTPD_SERVICE_NAME}
+    name: ${JEKYLL_HTTPD_SERVICE_NAME}
+  spec:
+    clusterIP: null
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    selector:
+      deploymentconfig: ${JEKYLL_HTTPD_SERVICE_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
   spec:
     clusterIP: null
     ports:
@@ -282,16 +432,16 @@ objects:
       protocol: TCP
       targetPort: 8080
     selector:
-      deploymentconfig: jekyll-serve-next
+      deploymentconfig: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
     sessionAffinity: None
     type: ClusterIP
+
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations: null
     labels:
-      app: jekyll-serve-prod
-    name: jekyll-serve-prod
+      app: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
   spec:
     clusterIP: null
     ports:
@@ -304,35 +454,13 @@ objects:
       protocol: TCP
       targetPort: 8080
     selector:
-      deploymentconfig: jekyll-serve-prod
+      deploymentconfig: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
     sessionAffinity: None
     type: ClusterIP
+
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations: null
-    labels:
-      app: jekyll-serve-prod-latest
-    name: jekyll-serve-prod-latest
-  spec:
-    clusterIP: null
-    ports:
-    - name: 4000-tcp
-      port: 4000
-      protocol: TCP
-      targetPort: 4000
-    - name: 8080-tcp
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
-    selector:
-      deploymentconfig: jekyll-serve-prod-latest
-    sessionAffinity: None
-    type: ClusterIP
-- apiVersion: v1
-  kind: Service
-  metadata:
-    annotations: null
     labels:
       app: s2i-jekyll
     name: s2i-jekyll
@@ -348,55 +476,138 @@ objects:
       deploymentconfig: s2i-jekyll
     sessionAffinity: None
     type: ClusterIP
+
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     annotations:
       openshift.io/host.generated: "true"
     labels:
-      app: jekyll-serve-prod
-    name: jekyll-serve
+      app: ${JEKYLL_HTTPD_SERVICE_NAME}
+    name: ${JEKYLL_HTTPD_SERVICE_NAME}
+  spec:
+    host: null
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: ${JEKYLL_HTTPD_SERVICE_NAME}
+      weight: 100
+    wildcardPolicy: None
+
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_SERVICE_NAME}
   spec:
     alternateBackends:
     - kind: Service
-      name: jekyll-serve-prod-latest
+      name: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
       weight: 0
+    host: null
     port:
       targetPort: 4000-tcp
     to:
       kind: Service
-      name: jekyll-serve-prod
+      name: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
       weight: 100
     wildcardPolicy: None
+
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     annotations:
       openshift.io/host.generated: "true"
     labels:
-      app: jekyll-serve-prod
-    name: jekyll-serve-prod
+      app: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
   spec:
+    host: null
     port:
       targetPort: 4000-tcp
     to:
       kind: Service
-      name: jekyll-serve-prod
+      name: ${JEKYLL_SERVE_PROD_SERVICE_NAME}
       weight: 100
     wildcardPolicy: None
+
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     annotations:
       openshift.io/host.generated: "true"
     labels:
-      app: jekyll-serve-prod-latest
-    name: jekyll-serve-prod-latest
+      app: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
+    name: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
   spec:
+    host: null
     port:
       targetPort: 4000-tcp
     to:
       kind: Service
-      name: jekyll-serve-prod-latest
+      name: ${JEKYLL_SERVE_LATEST_SERVICE_NAME}
       weight: 100
     wildcardPolicy: None
+
+kind: Template
+metadata:
+  name: s2i-jekyll
+  resourceVersion: ""
+  selfLink: ""
+labels:
+  template: jekyll-template
+parameters:
+
+- description: The name of the OpenShift Route combining the jekyll-serve-prod and jekyll-serve-latest services.
+  displayName: Route name of the combined services
+  name: JEKYLL_SERVE_SERVICE_NAME
+  value: jekyll-serve
+
+- description: The name of the OpenShift Service exposed for the jekyll-serve-prod container.
+  displayName: Sevice name of jekyll-serve-prod
+  name: JEKYLL_SERVE_PROD_SERVICE_NAME
+  value: jekyll-serve-prod
+
+- description: The name of the OpenShift Service exposed for the jekyll-serve-latest container.
+  displayName: Sevice name of jekyll-serve-latest
+  name: JEKYLL_SERVE_LATEST_SERVICE_NAME
+  value: jekyll-serve-latest
+
+- description: The name of the OpenShift Service exposed for the jekyll-httpd container.
+  displayName: Sevice name of jekyll-httpd
+  name: JEKYLL_HTTPD_SERVICE_NAME
+  value: jekyll-httpd
+
+- description: The namespace of the httpd container.
+  displayName: Namespace name of httpd container
+  name: HTTPD_IMAGE_NAMESPACE
+  value: centos
+
+- description: The image name of the httpd container.
+  displayName: Image name of httpd container
+  name: HTTPD_IMAGE_NAME
+  value: httpd-24-centos7
+
+- description: The image tag name of the httpd container.
+  displayName: Image tag name of httpd container
+  name: HTTPD_IMAGE_TAG_NAME
+  value: latest
+
+- description: The namespace of the ruby container.
+  displayName: Namespace name of ruby container
+  name: RUBY_IMAGE_NAMESPACE
+  value: centos
+
+- description: The image name of the ruby container.
+  displayName: Image name of ruby container
+  name: RUBY_IMAGE_NAME
+  value: ruby-25-centos7
+
+- description: The image tag name of the ruby container.
+  displayName: Image tag name of ruby container
+  name: RUBY_IMAGE_TAG_NAME
+  value: latest
