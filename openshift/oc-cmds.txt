@@ -1,6 +1,47 @@
-oc new-project jekyll-test-site --display-name="Jekyll Test Site" --description="This is a generated Jekyll website"
+#!/usr/bin/env bash
 
+# create a new project
+oc new-project jekyll-test-site \
+  --display-name="Jekyll Test Site" \
+  --description="This is a generated Jekyll website"
+
+# process and import out template, just take the defaults
 oc process -f openshift/template.yml | oc apply -f -
 
-# wait for oc imagestream my-jekyll-site/jekyll-serve:latest
-oc tag my-jekyll-site/jekyll-serve:latest my-jekyll-site/jekyll-serve:prod
+# we can also override a couple of them, such as to deploy on RHEL
+# ... though this doesn't work for me
+#
+# oc process -f openshift/template.yml \
+#   -p S2I_JEKYLL_DOCKERFILE=Dockerfile.rhel7 \
+#   -p HTTPD_IMAGE_NAMESPACE=registry.redhat.io/rhscl \
+#   -p HTTPD_IMAGE_NAME=httpd-24-rhel7 \
+#   -p HTTPD_IMAGE_TAG_NAME=latest \
+#   -p RUBY_IMAGE_NAMESPACE=registry.redhat.io/rhscl \
+#   -p RUBY_IMAGE_NAME=ruby-25-rhel7 \
+#   -p RUBY_IMAGE_TAG_NAME=latest \
+#  | oc apply -f -
+
+# wait for the s2i-jekyll build to complete
+oc logs -f bc/s2i-jekyll
+
+# wait for jekyll-serve:latest
+oc logs -f bc/jekyll-serve-latest
+
+# set the latest to prod tag so it will be deployed
+oc tag jekyll-serve:latest jekyll-serve:prod
+
+# We default to sending all traffic to jekyll-serve-latest, but as soon as
+# the jekyll-serve-prod deployment is live after the :prod tag is created,
+# increase the traffic percentage going to jekyll-serve-prod by 100% relative
+# to jekyll-serve-latest
+oc set route-backends jekyll-serve jekyll-serve-prod=100 jekyll-serve-latest=0
+
+# start a build of the s2i-jekyll image
+oc start-build bc/s2i-jekyll
+
+# start a build of the jekyll-serve-latest image
+oc start-build bc/jekyll-serve-latest
+
+# start a deploy of static content on a httpd image
+# not affected by image changes to jekyll-serve:prod
+oc start-build bc/jekyll-httpd
