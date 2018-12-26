@@ -1,3 +1,0 @@
-# This is for the purpose of building this container
-# on the centos container pipeline.
-job-id: s2i-jekyll:ruby-21-centos7
