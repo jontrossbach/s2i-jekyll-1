@@ -43,7 +43,7 @@ then run the resulting image with [Docker](http://docker.io) execute:
     $ s2i build \
         https://github.com/mrjoshuap/s2i-jekyll.git \
             --context-dir=2.1/test/jekyll-test-site/ \
-        mrjoshuap/jekyll-ruby-21-rhel7 \
+        mrjoshuap/s2i-jekyll:ruby-21-rhel7 \
         jekyll-test-site
 
     $ docker run -p 4000:4000 jekyll-test-site
@@ -54,7 +54,7 @@ then run the resulting image with [Docker](http://docker.io) execute:
     $ s2i build \
         https://github.com/mrjoshuap/s2i-jekyll.git \
             --context-dir=2.1/test/jekyll-test-site/ \
-        mrjoshuap/jekyll-ruby-21-centos7 \
+        mrjoshuap/s2i-jekyll:ruby-21-centos7 \
         jekyll-test-site
 
     $ docker run -p 4000:4000 jekyll-test-site

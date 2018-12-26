@@ -1,4 +1,4 @@
-# mrjoshuap/jekyll-ruby-25-centos7
+# mrjoshuap/s2i-jekyll:ruby-25-centos7
 FROM centos/ruby-25-centos7
 
 # This image provides a Jekyll environment you can use to generate your static website
@@ -6,7 +6,7 @@ FROM centos/ruby-25-centos7
 EXPOSE 4000
 
 ENV BUILDER_VERSION=1.0 \
-    IMAGE_NAME="mrjoshuap/jekyll-ruby-$RUBY_SCL_NAME_VERSION-centos7"
+    IMAGE_NAME="mrjoshuap/s2i-jekyll:ruby-25-centos7"
 
 ENV SUMMARY="Platform for generating a Jekyll based static website" \
     DESCRIPTION="Ruby $RUBY_VERSION is used to build a Jekyll website."
@@ -20,7 +20,7 @@ LABEL summary="$SUMMARY" \
       # (run, assemble, save-artifacts)
       io.openshift.s2i.scripts-url="image://$STI_SCRIPTS_PATH" \
       io.openshift.tags="builder,jekyll,ruby,ruby${RUBY_SCL_NAME_VERSION},${RUBY_SCL}" \
-      com.redhat.component="jekyll-${RUBY_SCL}-container" \
+      com.redhat.component="${RUBY_SCL}-container" \
       name="${IMAGE_NAME}" \
       usage="s2i build https://github.com/mrjoshuap/s2i-jekyll.git \
 --context-dir=${RUBY_VERSION}/test/example/ ${IMAGE_NAME} jekyll-artifact-image" \

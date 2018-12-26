@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# S2I run script for the 'jekyll-ruby-21-centos7' image.
+# S2I run script for the 's2i-jekyll:ruby-21-*' image.
 #
 # The 'run' script runs your application image.
 #

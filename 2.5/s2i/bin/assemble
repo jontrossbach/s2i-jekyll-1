@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# S2I assemble script for the 'jekyll-ruby-25' image.
+# S2I assemble script for the 's2i-jekyll:ruby-25-*' image.
 #
 # The 'assemble' script builds your application source so that it is ready to run.
 #
