@@ -1,4 +1,4 @@
-oc new-project my-jekyll-site --display-name="My Jekyll Site" --description="This is my generated Jekyll website"
+oc new-project jekyll-test-site --display-name="Jekyll Test Site" --description="This is a generated Jekyll website"
 
 oc process -f openshift/template.yml | oc apply -f -
 
