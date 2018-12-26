@@ -1,0 +1,74 @@
+#!/bin/bash -e
+#
+# S2I run script for the 'jekyll-ruby-21-centos7' image.
+#
+# The 'run' script runs your application image.
+#
+# For more information refer to the documentation:
+# https://github.com/openshift/source-to-image/blob/master/docs/builder_image.md
+#
+
+SOURCE_DIR=/tmp/src
+
+function is_jekyll_installed() {
+  [ ! -f $SOURCE_DIR/Gemfile.lock ] && return 1
+  grep ' jekyll ' $SOURCE_DIR/Gemfile.lock >/dev/null
+}
+
+if [[ "$1" == "-h" ]]; then
+  # If the 's2i-jekyll' run script is executed with '-h' flag,
+  # print the usage.
+  exec ${STI_SCRIPTS_PATH}/usage
+fi
+
+set -e
+
+echo "---> enabling software collections rh-ruby21"
+source scl_source enable rh-ruby21
+
+if [[ -n "$DEBUG" ]]; then
+  echo "==================================================="
+  echo "==================================================="
+  echo "Environment Variables:"
+  env
+  echo "==================================================="
+  echo "==================================================="
+
+  echo "==================================================="
+  echo "==================================================="
+  echo "Finding all files in ${APP_ROOT}:"
+  find ${APP_ROOT}
+  echo "==================================================="
+  echo "==================================================="
+
+  echo "==================================================="
+  echo "==================================================="
+  echo "Finding all files in /tmp:"
+  find /tmp
+  echo "==================================================="
+  echo "==================================================="
+  echo ""
+fi
+
+if is_jekyll_installed; then
+  export_vars=$(cgroup-limits) ; export $export_vars
+
+  if [ ! -d "$SOURCE_DIR" ]; then
+     echo "Error: Source volume not mounted or available"
+     exit 1
+  fi
+
+  cd "$SOURCE_DIR"
+
+  if [ "${JEKYLL_WATCH:-0}" != "0" ]; then
+    echo "Watching for changes"
+    JEKYLL_SERVE_ARGS="${JEKYLL_SERVE_ARGS} --watch"
+  else
+    JEKYLL_SERVE_ARGS="${JEKYLL_SERVE_ARGS} --no-watch"
+  fi
+
+  echo "---> starting jekyll serve"
+  exec bundle exec "jekyll serve --skip-initial-build --host=0.0.0.0 --destination=${HOME}/html ${JEKYLL_SERVE_ARGS}"
+else
+  echo "Your static website did not appear to generate properly."
+fi
