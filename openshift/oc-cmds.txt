@@ -12,13 +12,16 @@ oc process -f openshift/template.yml | oc apply -f -
 # ... though this doesn't work for me
 #
 # oc process -f openshift/template.yml \
+#   -p JEKYLL_GIT_REPO=https://github.com/mrjoshuap/s2i-jekyll.git \
+#   -p JEKYLL_GIT_REF_NAME=master \
+#   -p JEKYLL_GIT_CONTEXT_DIR=2.5/test/jekyll-test-site \
 #   -p S2I_JEKYLL_DOCKERFILE=Dockerfile.rhel7 \
-#   -p HTTPD_IMAGE_NAMESPACE=registry.redhat.io/rhscl \
-#   -p HTTPD_IMAGE_NAME=httpd-24-rhel7 \
+#   -p HTTPD_IMAGE_NAMESPACE=openshift  \
+#   -p HTTPD_IMAGE_NAME=httpd \
 #   -p HTTPD_IMAGE_TAG_NAME=latest \
-#   -p RUBY_IMAGE_NAMESPACE=registry.redhat.io/rhscl \
-#   -p RUBY_IMAGE_NAME=ruby-25-rhel7 \
-#   -p RUBY_IMAGE_TAG_NAME=latest \
+#   -p RUBY_IMAGE_NAMESPACE=openshift \
+#   -p RUBY_IMAGE_NAME=ruby \
+#   -p RUBY_IMAGE_TAG_NAME=2.5 \
 #  | oc apply -f -
 
 # wait for the s2i-jekyll build to complete

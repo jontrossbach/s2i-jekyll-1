@@ -101,6 +101,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${HTTPD_IMAGE_NAME}:${HTTPD_IMAGE_TAG_NAME}
+          namespace: ${HTTPD_IMAGE_NAMESPACE}
       type: Docker
     triggers:
     # This doesn't seem to have any effect?
@@ -185,6 +186,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${RUBY_IMAGE_NAME}:${RUBY_IMAGE_TAG_NAME}
+          namespace: ${RUBY_IMAGE_NAMESPACE}
       type: Docker
     successfulBuildsHistoryLimit: 5
     triggers:
@@ -640,7 +642,7 @@ parameters:
 - description: The filename of the s2i-jekyll Dockerfile used to build the image
   displayName: file name of s2i-jekyll Dockerfile
   name: S2I_JEKYLL_DOCKERFILE
-  value: Dockerfile
+  value: Dockerfile.rhel7
 
 - description: The context directory of s2i-jekyll
   displayName: git context directory of s2i-jekyll
@@ -670,29 +672,29 @@ parameters:
 - description: The namespace of the httpd container.
   displayName: Namespace name of httpd container
   name: HTTPD_IMAGE_NAMESPACE
-  value: centos
+  value: openshift
 
 - description: The image name of the httpd container.
   displayName: Image name of httpd container
   name: HTTPD_IMAGE_NAME
-  value: httpd-24-centos7
+  value: httpd
 
 - description: The image tag name of the httpd container.
   displayName: Image tag name of httpd container
   name: HTTPD_IMAGE_TAG_NAME
-  value: latest
+  value: "2.4"
 
 - description: The namespace of the ruby container.
   displayName: Namespace name of ruby container
   name: RUBY_IMAGE_NAMESPACE
-  value: centos
+  value: openshift
 
 - description: The image name of the ruby container.
   displayName: Image name of ruby container
   name: RUBY_IMAGE_NAME
-  value: ruby-25-centos7
+  value: ruby
 
 - description: The image tag name of the ruby container.
   displayName: Image tag name of ruby container
   name: RUBY_IMAGE_TAG_NAME
-  value: latest
+  value: "2.5"
