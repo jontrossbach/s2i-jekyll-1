@@ -170,7 +170,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: s2i-jekyll:latest
+        name: s2i-jekyll:${S2I_JEKYLL_IMAGE_TAG_NAME}
     postCommit: {}
     resources: {}
     runPolicy: Serial
@@ -642,7 +642,7 @@ parameters:
 - description: Specify the tag of the s2i-jekyll built container image
   displayName: s2i-jekyll container image tag
   name: S2I_JEKYLL_IMAGE_TAG_NAME
-  value: ruby-25-rhel7
+  value: ruby-25-centos7
 
 - description: The git repository of s2i-jekyll
   displayName: git repository of s2i-jekyll

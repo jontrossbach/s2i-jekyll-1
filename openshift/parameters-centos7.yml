@@ -1,0 +1,13 @@
+JEKYLL_GIT_REPO="https://github.com/mrjoshuap/mrjoshuap.github.io.git"
+JEKYLL_GIT_REF_NAME="dev"
+JEKYLL_GIT_CONTEXT_DIR="/"
+
+HTTPD_IMAGE_NAMESPACE="centos"
+HTTPD_IMAGE_NAME="httpd-24-centos7"
+HTTPD_IMAGE_TAG_NAME="latest"
+
+RUBY_IMAGE_NAMESPACE="centos"
+RUBY_IMAGE_NAME="ruby-25-centos7"
+RUBY_IMAGE_TAG_NAME="latest"
+
+S2I_JEKYLL_IMAGE_TAG_NAME="ruby-25-centos7"

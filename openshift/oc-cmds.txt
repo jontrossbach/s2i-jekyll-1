@@ -6,11 +6,9 @@ oc new-project jekyll-test-site \
   --description="This is a generated Jekyll website"
 
 # process and import out template, just take the defaults
-oc process -f openshift/template.yml | oc apply -f -
+# oc process -f openshift/template.yml | oc apply -f -
 
 # we can also override a couple of them, such as to deploy on RHEL
-# ... though this doesn't work for me
-#
 # oc process -f openshift/template.yml \
 #   -p JEKYLL_GIT_REPO=https://github.com/mrjoshuap/s2i-jekyll.git \
 #   -p JEKYLL_GIT_REF_NAME=master \
@@ -23,6 +21,11 @@ oc process -f openshift/template.yml | oc apply -f -
 #   -p RUBY_IMAGE_NAME=ruby \
 #   -p RUBY_IMAGE_TAG_NAME=2.5 \
 #  | oc apply -f -
+
+# preferably, we use a parameters file to keep our template sane.
+oc process --param-file openshift/parameters-rhel7.yml \
+  -f openshift/template.yml \
+  | oc apply -f -
 
 # wait for the s2i-jekyll build to complete
 oc logs -f bc/s2i-jekyll

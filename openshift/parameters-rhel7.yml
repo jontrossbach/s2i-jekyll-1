@@ -1,0 +1,14 @@
+JEKYLL_GIT_REPO="https://github.com/mrjoshuap/mrjoshuap.github.io.git"
+JEKYLL_GIT_REF_NAME="dev"
+JEKYLL_GIT_CONTEXT_DIR="/"
+
+HTTPD_IMAGE_NAMESPACE="openshift"
+HTTPD_IMAGE_NAME="httpd"
+HTTPD_IMAGE_TAG_NAME="2.4"
+
+RUBY_IMAGE_NAMESPACE="openshift"
+RUBY_IMAGE_NAME="ruby"
+RUBY_IMAGE_TAG_NAME="2.5"
+
+S2I_JEKYLL_DOCKERFILE=Dockerfile.rhel7
+S2I_JEKYLL_IMAGE_TAG_NAME="ruby-25-rhel7"
