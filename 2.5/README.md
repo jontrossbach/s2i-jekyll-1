@@ -161,8 +161,8 @@ build environment variables.
 * **JEKYLL_WATCH**
 
     When set to a non-zero value, Jekyll will watch for changes to rebuild.
-    This does only applies to sites served with
-    the built container image.  See Hot Deployments below.
+    This does only applies to sites served with the built container image.
+    See Hot Deployments below.
     Defaults to `0`
 
 * **RUBYGEM_MIRROR**
