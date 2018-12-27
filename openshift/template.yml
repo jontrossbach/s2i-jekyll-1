@@ -173,7 +173,7 @@ objects:
       type: Git
     strategy:
       dockerStrategy:
-        dockerfilePath: ${S2I_JEKYLL_GIT_CONTEXT_DIR}/${S2I_JEKYLL_DOCKERFILE}
+        dockerfilePath: ${S2I_JEKYLL_DOCKERFILE}
         from:
           kind: ImageStreamTag
           name: ${RUBY_IMAGE_NAME}:${RUBY_IMAGE_TAG_NAME}
