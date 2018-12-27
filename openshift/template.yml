@@ -101,6 +101,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${HTTPD_IMAGE_NAME}:${HTTPD_IMAGE_TAG_NAME}
+          namespace: ${HTTPD_IMAGE_NAMESPACE}
       type: Docker
     triggers:
     # This doesn't seem to have any effect?
@@ -150,7 +151,7 @@ objects:
           value: "${RUBYGEM_MIRROR}"
         from:
           kind: ImageStreamTag
-          name: s2i-jekyll:latest
+          name: s2i-jekyll:${S2I_JEKYLL_IMAGE_TAG_NAME}
       type: Source
     successfulBuildsHistoryLimit: 5
     triggers:
@@ -185,6 +186,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${RUBY_IMAGE_NAME}:${RUBY_IMAGE_TAG_NAME}
+          namespace: ${RUBY_IMAGE_NAMESPACE}
       type: Docker
     successfulBuildsHistoryLimit: 5
     triggers:
@@ -606,6 +608,16 @@ parameters:
   value: production
 
 - description:
+    Additional arguments to pass to the jekyll build command line.
+  displayName: Jekyll Build Arguments
+  name: JEKYLL_BUILD_ARGS
+
+- description:
+    Additional arguments to pass to the jekyll serve command line.
+  displayName: Jekyll Serve Arguments
+  name: JEKYLL_SERVE_ARGS
+
+- description:
     When set to a non-zero value, Jekyll will render posts in the `_drafts`
     folder.
   displayName: Render drafts
@@ -626,6 +638,11 @@ parameters:
 - description: Specify a Ruby Gem Mirror to utilize
   displayName: Ruby Gem Mirror
   name: RUBYGEM_MIRROR
+
+- description: Specify the tag of the s2i-jekyll built container image
+  displayName: s2i-jekyll container image tag
+  name: S2I_JEKYLL_IMAGE_TAG_NAME
+  value: ruby-25-rhel7
 
 - description: The git repository of s2i-jekyll
   displayName: git repository of s2i-jekyll
