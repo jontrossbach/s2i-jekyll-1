@@ -50,6 +50,8 @@ if [ -n "$RUBYGEM_MIRROR" ]; then
   bundle config mirror.https://rubygems.org $RUBYGEM_MIRROR
 fi
 bundle install --path ${HOME}/vendor/bundle ${BUNDLE_INSTALL_ARGS}
+ls -R ${HOME}/vendor/bundle
+
 
 #echo "---> Updating bundle"
 #bundle update ${BUNDLE_UPDATE_ARGS}
