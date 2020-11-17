@@ -51,11 +51,11 @@ if [ -n "$RUBYGEM_MIRROR" ]; then
 fi
 bundle install --path ${HOME}/vendor/bundle ${BUNDLE_INSTALL_ARGS}
 
-echo "---> Updating bundle"
-bundle update ${BUNDLE_UPDATE_ARGS}
+#echo "---> Updating bundle"
+#bundle update ${BUNDLE_UPDATE_ARGS}
 
-echo "---> Cleaning up unused ruby gems ..."
-bundle clean -V ${BUNDLE_CLEAN_ARGS}
+#echo "---> Cleaning up unused ruby gems ..."
+#bundle clean -V ${BUNDLE_CLEAN_ARGS}
 
 echo "---> Running jekyll build ... "
 if [ "${JEKYLL_DRAFTS:-0}" != "0" ]; then
